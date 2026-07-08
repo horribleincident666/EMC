@@ -1,0 +1,8 @@
+node_modules/
+.env
+.railway/
+npm-debug.log*
+*.zip
+data/*.json
+data/backups/
+data/manual-backups/

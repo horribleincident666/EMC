@@ -1,0 +1,20 @@
+{
+  "name": "EMC Production Management",
+  "short_name": "EMC Production",
+  "description": "EMC production, stock, formulation, rack tracking, task allocation, and audit management.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3faf5",
+  "theme_color": "#2d7a55",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "emc-logo.jpg",
+      "sizes": "400x400",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
