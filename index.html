@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EMC Production Command Center</title>
+  <meta name="theme-color" content="#2d7a55">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="EMC Production">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="emc-logo.jpg">
+  <link rel="stylesheet" href="styles.css?v=20260709-photo-chat-data-fix">
+</head>
+<body>
+  <div id="loginView" class="login-shell">
+    <div class="rig-bg"><span></span><span></span><span></span><span></span></div>
+    <section class="login-card">
+      <img src="emc-logo.jpg" alt="European Mud Company logo" class="login-logo">
+      <p class="eyebrow">Protected EMC India manufacturing interface</p>
+      <h1>Production Command Center</h1>
+      <div class="login-tabs">
+        <button id="showSignInBtn" class="active" type="button">Sign in</button>
+        <button id="showSignUpBtn" type="button">Sign up</button>
+      </div>
+      <div id="signInBox" class="login-mode">
+        <label>Username / Email<input id="loginName" autocomplete="username" placeholder="Enter your username or email"></label>
+        <label>Password<input id="loginPassword" type="password" placeholder="Password"></label>
+        <button id="loginBtn">Sign in</button>
+      </div>
+      <div id="signUpBox" class="login-mode hidden">
+        <label>Full name<input id="signupName" autocomplete="name" placeholder="Enter full name"></label>
+        <label>Username<input id="signupUsername" autocomplete="username" placeholder="Create username"></label>
+        <label>Email optional<input id="signupEmail" autocomplete="email" placeholder="Email address"></label>
+        <label>Create password<input id="signupPassword" type="password" autocomplete="new-password" placeholder="Create password"></label>
+        <button id="signupBtn">Request Admin approval</button>
+      </div>
+      <button id="forgotPasswordBtn" class="recovery ghost" type="button">Forgot password? Notify Admin</button>
+      <button id="installAppBtn" class="recovery ghost" type="button">Download / Install app</button>
+      <p id="loginError" class="error"></p>
+    </section>
+  </div>
+
+  <div id="adminUnlockModal" class="modal-overlay hidden">
+    <section class="modal-card">
+      <h3>Admin Access</h3>
+      <p>Enter Admin password to open the Admin panel.</p>
+      <label>Admin password<input id="adminPanelPassword" type="password" autocomplete="current-password" placeholder="Admin password"></label>
+      <div class="modal-actions">
+        <button id="adminUnlockBtn" type="button">Open Admin panel</button>
+        <button id="adminCancelUnlockBtn" class="ghost" type="button">Cancel</button>
+      </div>
+      <p id="adminUnlockError" class="error"></p>
+    </section>
+  </div>
+
+  <div id="adminIdentityModal" class="modal-overlay hidden">
+    <section class="modal-card">
+      <h3>Admin Working Name</h3>
+      <p>Select the name that should appear online and in audit trail. First login creates a personal password; after that the same IP can continue without retyping it.</p>
+      <label>Working username
+        <select id="adminIdentitySelect">
+          <option value="SD">SD</option>
+          <option value="PJ">PJ</option>
+          <option value="SKM">SKM</option>
+        </select>
+      </label>
+      <label>Personal admin password<input id="adminIdentityPassword" type="password" autocomplete="current-password" placeholder="Create or enter personal password; blank only for trusted IP"></label>
+      <label>Recovery email optional<input id="adminIdentityEmail" type="email" placeholder="Your email for future recovery"></label>
+      <div class="modal-actions">
+        <button id="adminIdentityConfirmBtn" type="button">Continue</button>
+        <button id="adminIdentityRecoverBtn" class="ghost" type="button">Forgot / recover</button>
+      </div>
+      <p id="adminIdentityError" class="error"></p>
+    </section>
+  </div>
+
+  <div id="machineAddModal" class="modal-overlay hidden">
+    <section class="modal-card wider-modal">
+      <h3>Add Machinery</h3>
+      <p>Add the machine details here. Screen setup is required only for sieving machines; it can be left blank if not decided.</p>
+      <label>Machine name<input id="newMachineName" placeholder="Machine name"></label>
+      <label>Machine category
+        <select id="newMachineCategory">
+          <option>Sieving machine</option>
+          <option>Grinding machine</option>
+          <option>Blending machine</option>
+          <option>Material handling equipments</option>
+        </select>
+      </label>
+      <label id="newMachineScreensLabel">Number of screens<input id="newMachineScreens" type="number" min="0" step="1" placeholder="Blank if not decided"></label>
+      <div class="modal-actions">
+        <button id="confirmAddMachineBtn" type="button">Add machinery</button>
+        <button id="cancelAddMachineBtn" class="ghost" type="button">Cancel</button>
+      </div>
+      <p id="machineAddError" class="error"></p>
+    </section>
+  </div>
+
+  <main id="appView" class="app hidden">
+    <aside class="side">
+      <img src="emc-logo.jpg" alt="EMC logo" class="logo">
+      <div>
+        <h2>EMC Console</h2>
+        <p id="userBadge">Signed in</p>
+      </div>
+      <section class="side-slideshow">
+        <div id="dashboardSlideshow" class="dashboard-slideshow"></div>
+        <button id="openPhotoManagerBtn" class="ghost side-photo-edit" type="button">Edit</button>
+      </section>
+      <nav id="nav"></nav>
+      <div class="signature">Created by <strong>SD/EMCINDIA</strong><br><span>Admin and interface creator</span></div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">EMC production management</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div id="dashboardClock" class="dashboard-clock"></div>
+        <div class="top-actions">
+          <input id="masterSearch" placeholder="Master search">
+          <select id="categorySearch" title="Search menu by category"></select>
+          <div class="format-controls" title="Text formatting for editable fields">
+            <select id="fontSizeControl" aria-label="Editable field font size">
+              <option value="12">12</option>
+              <option value="14">14</option>
+              <option value="16">16</option>
+              <option value="18">18</option>
+              <option value="20">20</option>
+            </select>
+            <input id="fontColorControl" type="color" value="#12211a" aria-label="Editable field font colour">
+            <select id="fontStyleControl" aria-label="Editable field font style">
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+              <option value="italic">Italic</option>
+              <option value="bold-italic">Bold Italic</option>
+            </select>
+          </div>
+          <span id="onlineUsers" class="online-pill"></span>
+          <button id="screenshotBtn" class="ghost" title="Download page screenshot">Shot</button>
+          <button id="exportBtn" class="ghost" title="Download Excel report">Excel</button>
+          <button id="printPageBtn" class="ghost" title="Print page">Print</button>
+          <button id="logoutBtn" class="ghost">Logout</button>
+        </div>
+      </header>
+      <div id="masterSearchResults" class="search-results hidden"></div>
+      <div id="liveActivityBar" class="live-activity hidden"></div>
+      <button id="activityBell" class="activity-bell" title="Recent activities"><span id="activityBellCount">0</span></button>
+      <div id="activityBellPanel" class="activity-bell-panel hidden"></div>
+      <button id="commFloatBtn" class="comm-float" title="Chat and voice call">Chat / Call</button>
+      <div id="commPanel" class="comm-panel hidden">
+        <div class="panel-head"><h3>Chat & Calling</h3><div class="panel-actions"><button id="minimizeCallBtn" class="ghost" type="button">Minimize</button><button id="fullscreenCallBtn" class="ghost" type="button">Full screen</button><button id="closeCommPanel" class="ghost" type="button">Close</button></div></div>
+        <div class="comm-row">
+          <select id="commMode"><option value="group">Group chat</option><option value="direct">Individual chat</option></select>
+          <select id="commUserSelect"></select>
+          <button id="addCallUserBtn" class="ghost" type="button">Add user</button>
+          <button id="startVoiceCallBtn" class="ghost" type="button">Voice</button>
+          <button id="startVideoCallBtn" class="ghost" type="button">Video</button>
+          <button id="muteCallBtn" class="ghost" type="button">Mute</button>
+          <button id="hangupVoiceCallBtn" class="ghost" type="button">Hang up</button>
+        </div>
+        <div id="callVideoGrid" class="call-video-grid hidden">
+          <video id="remoteCallVideo" autoplay playsinline></video>
+          <video id="localCallVideo" autoplay playsinline muted></video>
+        </div>
+        <div id="miniChatMessages" class="mini-chat"></div>
+        <div class="comm-row">
+          <input id="miniChatText" placeholder="Type quick message">
+          <select id="miniChatAudience"><option value="group">Everyone</option><option value="direct">Selected user</option></select>
+          <input id="miniChatFile" type="file" accept="image/*,video/*,.pdf,.xlsx,.xls,.doc,.docx,.txt">
+          <button id="sendMiniChatBtn" type="button">Send</button>
+        </div>
+        <p id="callStatus" class="muted-note"></p>
+        <audio id="remoteCallAudio" autoplay playsinline></audio>
+      </div>
+      <div id="incomingCallCard" class="incoming-call-card hidden">
+        <div>
+          <strong id="incomingCallName">Incoming call</strong>
+          <span id="incomingCallSub">EMC app voice call</span>
+        </div>
+        <div class="incoming-call-actions">
+          <button id="acceptCallBtn" type="button">Accept</button>
+          <button id="rejectCallBtn" class="ghost" type="button">Reject</button>
+        </div>
+      </div>
+
+      <div id="photoManagerModal" class="modal-overlay hidden">
+        <section class="modal-card photo-manager-card">
+          <div class="panel-head"><h3>Factory Photos</h3><button id="closePhotoManagerBtn" class="ghost" type="button">Close</button></div>
+          <div class="side-photo-controls manager-controls">
+            <label id="dashboardPhotoUploadLabel" class="upload-button tiny-upload">Add new photo<input id="dashboardPhotoUpload" type="file" accept="image/*" multiple></label>
+            <button id="confirmDashboardPhotosBtn" class="ghost tiny-btn" type="button">OK</button>
+            <button id="clearDashboardPhotosBtn" class="ghost tiny-btn" type="button">Delete all</button>
+          </div>
+          <div id="dashboardPhotoStrip" class="photo-strip side-photo-strip manager-strip"></div>
+          <div class="crop-controls">
+            <label>Crop X<input id="photoCropX" type="range" min="0" max="100" value="50"></label>
+            <label>Crop Y<input id="photoCropY" type="range" min="0" max="100" value="50"></label>
+            <label>Zoom<input id="photoCropZoom" type="range" min="1" max="2.5" step="0.05" value="1"></label>
+          </div>
+          <p class="muted-note">Select a thumbnail, adjust crop, or press the small x on a thumbnail to delete only that photo.</p>
+        </section>
+      </div>
+
+      <section id="dashboard" class="page active">
+        <div id="visitorNotice" class="notice visitor-notice hidden"></div>
+        <div id="skmNotice" class="notice general-notice"></div>
+        <div class="metrics">
+          <article class="clickable-card" data-dashboard-jump="stock"><span>Total closing stock of raw material</span><strong id="metricStock">0 kg</strong></article>
+          <article class="clickable-card" data-dashboard-jump="low-stock"><span>Materials below 1000 kg</span><strong id="metricLow">0</strong></article>
+          <article class="clickable-card" data-dashboard-jump="production"><span>Machines needing attention</span><strong id="metricMachines">0</strong></article>
+          <article class="clickable-card" data-dashboard-jump="ideas"><span>Open suggestions</span><strong id="metricIdeas">0</strong></article>
+          <article class="clickable-card" data-dashboard-jump="taskAllocation"><span>Good performer</span><strong id="metricGoodPerformer">-</strong></article>
+          <article class="clickable-card" data-dashboard-jump="taskAllocation"><span>Poor performer</span><strong id="metricPoorPerformer">-</strong></article>
+          <article class="clickable-card" data-dashboard-jump="production"><span>Critical spare stocks</span><strong id="metricCriticalSpares">0</strong></article>
+        </div>
+        <div class="dashboard-grid">
+          <section class="panel blend-plan-panel">
+            <div class="panel-head"><h3>Today's Blending Plan</h3><button id="saveBlendPlanBtn" type="button">Save plan</button></div>
+            <div class="blend-plan-grid">
+              <label>What's today's blending plan?<textarea id="todayBlendPlan" rows="4" placeholder="Write today's product/blending plan"></textarea></label>
+              <label>How much quantity is your target to blend?<textarea id="todayBlendTarget" rows="4" placeholder="Write target quantity, product-wise if needed"></textarea></label>
+            </div>
+          </section>
+          <section class="panel wide">
+            <div class="panel-head"><h3>Production Calendar</h3><input id="dashDate" type="date"></div>
+            <div id="dashSummary" class="summary-list"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Online Now</h3></div>
+            <div id="onlineList" class="chips"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Recent Audit Trail</h3></div>
+            <div id="recentAudit" class="mini-log"></div>
+          </section>
+          <section class="panel clickable-card" data-dashboard-jump="activity">
+            <div class="panel-head"><h3>Today's Major Activities</h3></div>
+            <div id="dashTodayActivity" class="summary-list"></div>
+          </section>
+          <section class="panel clickable-card" data-dashboard-jump="tomorrow">
+            <div class="panel-head"><h3>Tomorrow's Plan Broadcast</h3></div>
+            <div id="dashTomorrowPlan" class="summary-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="notification" class="page">
+        <section class="panel">
+          <h3>General Notification Bar</h3>
+          <textarea id="skmText" rows="5"></textarea>
+          <button id="saveSkmBtn">Publish highlighted notification</button>
+          <div id="readReceipts" class="mini-log"></div>
+        </section>
+      </section>
+
+      <section id="chat" class="page">
+        <section class="panel chat-panel">
+          <div class="panel-head"><h3>In-house Team Chat</h3><span>Messages can be unsent for 60 minutes.</span></div>
+          <div id="chatMessages" class="chat-messages"></div>
+          <div class="chat-stickers">
+            <button class="ghost" data-chat-sticker="👍" type="button">👍</button>
+            <button class="ghost" data-chat-sticker="✅" type="button">✅</button>
+            <button class="ghost" data-chat-sticker="⚠️" type="button">⚠️</button>
+            <button class="ghost" data-chat-sticker="🙏" type="button">🙏</button>
+            <button class="ghost" data-chat-sticker="📌" type="button">📌</button>
+          </div>
+          <div class="chat-compose">
+            <textarea id="chatText" rows="3" placeholder="Type team message"></textarea>
+            <input id="chatFile" type="file" accept="image/*,video/*,.pdf,.xlsx,.xls,.doc,.docx,.txt">
+            <button id="recordAudioBtn" class="ghost" type="button">Record audio note</button>
+            <button id="sendChatBtn" type="button">Send chat</button>
+          </div>
+          <p id="chatStatus" class="muted-note"></p>
+        </section>
+      </section>
+
+      <section id="kpi" class="page">
+        <div class="toolbar">
+          <button id="addKpiBtn">Add KPI row</button>
+          <button id="saveKpiBtn">Save KPI</button>
+          <select id="kpiPeriod">
+            <option value="all">All periods</option>
+            <option value="week">Weekly</option>
+            <option value="month">Monthly</option>
+            <option value="quarter">Quarterly</option>
+            <option value="year">Yearly</option>
+          </select>
+          <input id="kpiAnchorDate" type="date" title="Select date inside week, month, quarter, or year">
+          <select id="kpiCategoryFilter"><option value="">All KPI categories</option></select>
+        </div>
+        <div class="metrics" id="kpiMetrics"></div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-head"><h3>KPI Progress</h3></div>
+            <div id="kpiProgressGraph" class="bar-chart"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Critical KPI Items</h3></div>
+            <div id="kpiCritical" class="summary-list"></div>
+          </section>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><h3>KPI Objectives</h3><span>Weekly, monthly, quarterly, and yearly tracking</span></div>
+          <div class="table-wrap"><table id="kpiTable"></table></div>
+        </section>
+      </section>
+
+      <section id="production" class="page">
+        <div class="toolbar">
+          <select id="machineSelect"></select>
+          <button id="addMachineBtn">Add machinery</button>
+          <button id="saveMachineBtn">Save machine library</button>
+        </div>
+        <div class="machine-grid">
+          <section class="panel machine-main">
+            <h3>Machinery Library</h3>
+            <div id="machineLibrary"></div>
+          </section>
+          <section class="panel wide-panel">
+            <div class="panel-head"><h3>Breakdown History</h3><button id="addBreakdownBtn">Add breakdown</button></div>
+            <div id="breakdownHistory"></div>
+          </section>
+          <section class="panel wide-panel">
+            <div class="panel-head"><h3>Spare List</h3><button id="addSpareBtn">Add spare part</button></div>
+            <div class="table-wrap compact-wrap"><table id="spareParts"></table></div>
+          </section>
+          <section class="panel wide-panel">
+            <div class="panel-head"><h3>Available Screen Details</h3><button id="addScreenDetailBtn">Add screen row</button></div>
+            <div class="table-wrap compact-wrap"><table id="screenDetailsTable"></table></div>
+            <div id="screenHistory" class="summary-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="stock" class="page">
+        <div class="toolbar">
+          <input id="stockDate" type="date">
+          <select id="stockCategory"></select>
+          <input id="newStockCategory" placeholder="New stock category name">
+          <button id="addStockCategoryBtn" type="button">Add category</button>
+          <button id="deleteStockCategoryBtn" class="ghost" type="button">Delete category</button>
+          <button id="addVariantBtn">Add new variant</button>
+          <button id="saveStockBtn">Save stock</button>
+        </div>
+        <div class="table-wrap"><table id="stockTable"></table></div>
+      </section>
+
+      <section id="formulation" class="page">
+        <div class="toolbar">
+          <span class="toolbar-label">Which product do you want to manufacture or formulate?</span>
+          <select id="productSelect"></select>
+          <button id="addProductBtn">Add product</button>
+          <button id="addMeshTopBtn">Add mesh row</button>
+          <button id="newFormulationBtn">New formulation</button>
+          <button id="saveFormulationBtn">Save formulation</button>
+          <button id="exportFormulationBtn">Export formulation Excel</button>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><h3 id="formulationTitle">Formulation</h3><div class="panel-actions"><button id="autoBlendBtn" type="button">Auto suggest blend</button><span id="blendScore"></span></div></div>
+          <div id="formulationMeta" class="inline-grid"></div>
+          <div id="formulationRecords" class="history-strip"></div>
+          <div class="table-wrap formulation-wrap"><table id="formulationTable" class="formulation-table"></table></div>
+        </section>
+      </section>
+
+      <section id="racktrack" class="page">
+        <section class="racktrack-panel">
+          <div class="panel-head">
+            <h3>Rack Tracking</h3>
+            <span id="rackStatus" class="muted-note">Ready</span>
+          </div>
+          <div class="toolbar rack-toolbar">
+            <input id="rackSearch" type="search" placeholder="Search location, product, batch">
+            <select id="rackProductFilter"></select>
+            <select id="rackStatusFilter">
+              <option value="all">All locations</option>
+              <option value="occupied">Occupied</option>
+              <option value="free">Free</option>
+            </select>
+            <button id="addRackPalletBtn">Add pallet</button>
+            <button id="refreshRackBtn">Refresh rack</button>
+          </div>
+          <div class="rack-tabs">
+            <button class="active" data-rack-view="dashboard" type="button">Dashboard</button>
+            <button data-rack-view="locations" type="button">Locations</button>
+            <button data-rack-view="stock" type="button">Stock</button>
+            <button data-rack-view="catalog" type="button">Catalog</button>
+            <button data-rack-view="activity" type="button">Activity</button>
+          </div>
+
+          <section id="rackPalletPanel" class="panel hidden">
+            <div class="panel-head"><h3 id="rackFormTitle">Add pallet</h3><button id="cancelRackPalletBtn" class="ghost" type="button">Cancel</button></div>
+            <form id="rackPalletForm" class="rack-form">
+              <input id="rackPalletId" type="hidden">
+              <label>Product<select id="rackPalletProduct"></select></label>
+              <label>Location<select id="rackPalletLocation"></select></label>
+              <label>Batch No.<input id="rackPalletBatch" placeholder="Optional"></label>
+              <label>FIFO date<input id="rackPalletDate" type="date"></label>
+              <label>Packaging<select id="rackPalletPackaging"><option>Paper sacks</option><option>Jumbo bag</option></select></label>
+              <label id="rackWeightClassBox">Jumbo weight<select id="rackPalletWeight"><option value="550">550 kg</option><option value="650">650 kg</option></select></label>
+              <label id="rackSackWeightBox">Sack weight kg<input id="rackPalletSackWeight" type="number" step="0.1" min="0" value="13"></label>
+              <label id="rackSackCountBox">No. of sacks<input id="rackPalletSackCount" type="number" min="1" value="42"></label>
+              <label>Net pallet kg<input id="rackPalletNetKg" type="number" step="0.1" readonly></label>
+              <label class="wide">Notes<textarea id="rackPalletNotes" rows="3" placeholder="QC status, customer, movement note"></textarea></label>
+              <label>Password<input id="rackPalletPassword" type="password" placeholder="EMC password"></label>
+              <button class="primary-button" type="submit">Save pallet</button>
+            </form>
+          </section>
+
+          <section id="rackViewDashboard" class="rack-view active">
+            <div id="rackMetrics" class="metrics rack-metrics"></div>
+            <div class="dashboard-grid rack-grid">
+              <section class="panel">
+                <div class="panel-head"><h3>Rack Occupancy</h3></div>
+                <div id="rackOccupancy" class="rack-mini-grid"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-head"><h3>FIFO Attention</h3></div>
+                <div id="rackFifo" class="summary-list"></div>
+              </section>
+            </div>
+          </section>
+
+          <section id="rackViewLocations" class="rack-view">
+            <section class="panel">
+              <div class="panel-head"><h3>Locations</h3></div>
+              <div id="rackLocations" class="rack-location-grid"></div>
+            </section>
+          </section>
+
+          <section id="rackViewStock" class="rack-view">
+            <section class="panel">
+              <div class="panel-head"><h3>Rack Stock</h3></div>
+              <div class="table-wrap"><table id="rackStockTable"></table></div>
+            </section>
+          </section>
+
+          <section id="rackViewCatalog" class="rack-view">
+            <section class="panel">
+              <div class="panel-head"><h3>Product Catalog</h3></div>
+              <div id="rackCatalog" class="catalog-grid"></div>
+            </section>
+          </section>
+
+          <section id="rackViewActivity" class="rack-view">
+            <section class="panel">
+              <div class="panel-head"><h3>Rack Activity</h3></div>
+              <ol id="rackActivity" class="activity-log"></ol>
+            </section>
+          </section>
+        </section>
+      </section>
+
+      <section id="activity" class="page">
+        <div class="toolbar">
+          <input id="activityDate" type="date">
+          <button id="addActivityRowBtn">Add activity row</button>
+          <button id="saveActivityBtn">Save activity log</button>
+        </div>
+        <section class="panel">
+          <h3>Activity Log</h3>
+          <div id="activitySlots"></div>
+        </section>
+      </section>
+
+      <section id="taskAllocation" class="page">
+        <div class="toolbar">
+          <button id="addTaskBtn">Add task</button>
+          <button id="saveTasksBtn">Save task allocation</button>
+          <input id="taskPersonSearch" list="taskPersonList" placeholder="Search person name">
+          <datalist id="taskPersonList"></datalist>
+          <select id="taskFilter"><option value="">All tasks</option><option value="Open">Open / Pending</option><option value="Completed">Completed</option><option value="Timeline Failed">Timeline Failed</option></select>
+        </div>
+        <div class="metrics" id="taskMetrics"></div>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-head"><h3>Task Performance Graph</h3></div>
+            <div id="taskGraph" class="bar-chart"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h3>Employee Score</h3></div>
+            <div id="taskScoreGraph" class="bar-chart"></div>
+          </section>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><h3>Task Allocation & Performance Tracker</h3></div>
+          <div class="table-wrap"><table id="taskTable"></table></div>
+        </section>
+      </section>
+
+      <section id="longPlans" class="page">
+        <div class="toolbar">
+          <button id="addLongPlanBtn">Add long term plan</button>
+          <button id="saveLongPlansBtn">Save long term plans</button>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><h3>Long Term Plans</h3></div>
+          <div class="table-wrap"><table id="longPlansTable"></table></div>
+        </section>
+      </section>
+
+      <section id="tomorrow" class="page">
+        <div class="toolbar">
+          <input id="planDate" type="date">
+          <button id="addPlanRowBtn">Add tomorrow plan row</button>
+          <button id="savePlanBtn">Save tomorrow's plan</button>
+        </div>
+        <section class="panel">
+          <h3>Tomorrow's Plan</h3>
+          <div id="planSlots"></div>
+        </section>
+      </section>
+
+      <section id="ideas" class="page">
+        <div class="toolbar">
+          <button id="addIdeaBtn">Add suggestion / approval item</button>
+          <button id="saveIdeasBtn">Save suggestions</button>
+        </div>
+        <div class="table-wrap"><table id="ideasTable" class="suggestions-table"></table></div>
+      </section>
+
+      <section id="grn" class="page">
+        <div class="toolbar">
+          <input id="newGrnHeading" placeholder="New heading name">
+          <button id="addGrnHeadingBtn" type="button">Add heading</button>
+          <select id="deleteGrnHeadingSelect"></select>
+          <button id="deleteGrnHeadingBtn" class="ghost" type="button">Delete heading</button>
+          <button id="addGrnBtn">Add GRN row</button>
+          <button id="saveGrnBtn">Save GRN</button>
+        </div>
+        <div class="table-wrap"><table id="grnTable"></table></div>
+      </section>
+
+      <section id="mesh" class="page">
+        <section class="panel">
+          <h3>Mesh to Micron Data</h3>
+          <div class="table-wrap"><table id="meshTable"></table></div>
+        </section>
+      </section>
+
+      <section id="audit" class="page">
+        <div class="toolbar">
+          <select id="auditFilter"><option value="">All actions</option><option>save</option><option>add</option><option>delete</option><option>login</option></select>
+          <button id="clearSearchBtn">Clear search</button>
+        </div>
+        <div id="auditLog" class="audit-log"></div>
+      </section>
+
+      <section id="admin" class="page">
+        <div class="toolbar">
+          <button id="addUserBtn">Add user</button>
+          <button id="saveUsersBtn">Save users</button>
+        </div>
+        <section class="panel">
+          <div class="panel-head"><h3>Admin Notifications</h3><span>Password recovery requests are visible only after Admin password entry.</span></div>
+          <div id="adminRequests" class="summary-list"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h3>User Management</h3><span>Approve sign-up requests, disable users, or reset passwords.</span></div>
+          <div class="table-wrap"><table id="usersTable"></table></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h3>Automatic Data Backups</h3><button id="refreshBackupsBtn" class="ghost" type="button">Refresh backups</button></div>
+          <div id="backupList" class="summary-list"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h3>Chats & Attachments</h3><button id="refreshChatArchiveBtn" class="ghost" type="button">Refresh chats</button></div>
+          <div id="adminChatArchive" class="summary-list"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="task-data.js?v=20260709-photo-chat-data-fix"></script>
+  <script src="app.js?v=20260709-photo-chat-data-fix"></script>
+</body>
+</html>
