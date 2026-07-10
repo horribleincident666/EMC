@@ -1,0 +1,22 @@
+EMC Production Management - Install as App
+
+This app uses the same online server link after Railway deployment.
+Do not make separate data copies for Windows or Android.
+
+Windows:
+1. Open the Railway public link in Microsoft Edge or Google Chrome.
+2. Click the install icon in the address bar, or open browser menu.
+3. Choose Install app / Install EMC Production.
+4. It will open like a Windows app from Start Menu/Desktop.
+
+Android:
+1. Open the Railway public link in Chrome.
+2. Tap the three-dot menu.
+3. Tap Add to Home screen or Install app.
+4. The EMC app icon will appear on the phone home screen.
+
+Important:
+- The installed app still needs internet.
+- All users connect to the same Railway server and same database files.
+- Camera is not required.
+- Login, audit trail, live sync, and user management remain server controlled.
